@@ -1,4 +1,5 @@
 #include <asm/atomic.h>
+#include <linux/delay.h>
 #include <linux/module.h>
 #include <linux/vmalloc.h>
 #include <linux/kthread.h>
@@ -10,6 +11,9 @@ static atomic_t *resource;
 #define rwlkm_readers 4
 #define rwlkm_writers 4
 
+/* Время блокировки потока (для снижения нагрузки на CPU) */
+#define rwlkm_sleep 2000
+
 /* Указатели на потоки ядра */
 static struct task_struct *rwlkm_reader_handlers[rwlkm_readers];
 static struct task_struct *rwlkm_writer_handlers[rwlkm_writers];
@@ -17,14 +21,20 @@ static struct task_struct *rwlkm_writer_handlers[rwlkm_writers];
 /* Функции потоков */
 static int rwlkm_reader(void* usrdata) {
 
-	while(!kthread_should_stop()) {}
+	while(!kthread_should_stop()) {
+		msleep(rwlkm_sleep);
+	}
+
 	return 0;
 
 }
 
 static int rwlkm_writer(void* usrdata) {
 
-	while(!kthread_should_stop()) {}
+	while(!kthread_should_stop()) {
+		msleep(rwlkm_sleep);
+	}
+	
 	return 0;
 
 }
