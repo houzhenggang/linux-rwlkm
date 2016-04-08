@@ -1,13 +1,12 @@
-#include <asm/uaccess.h>
-#include <linux/string.h>
+#include <asm/atomic.h>
 #include <linux/module.h>
 #include <linux/vmalloc.h>
 #include <linux/kthread.h>
 
 /* Общий ресурс */
-static int *resource;
+static atomic_t *resource;
 
-/* Количество поток читателей и писателей */
+/* Количество потоков читателей и писателей */
 #define rwlkm_readers 4
 #define rwlkm_writers 4
 
@@ -34,7 +33,7 @@ static int __init rwlkm_init(void) {
 
 	int i = 0;
 
-	resource = (int *) vmalloc(sizeof(int));
+	resource = (atomic_t *) vmalloc(sizeof(atomic_t));
 
 	if (!resource) {
 		return -ENOMEM;
