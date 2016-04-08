@@ -32,10 +32,6 @@ static int rwlkm_writer(void* usrdata) {
 
 static int __init rwlkm_init(void) {
 
-	/* Идентификатор потока ядра */
-	const int rwlkm_handler_name_len = 32;
-	char rwlkm_handler_name[rwlkm_handler_name_len];
-
 	int i = 0;
 
 	resource = (int *) vmalloc(sizeof(int));
@@ -45,13 +41,11 @@ static int __init rwlkm_init(void) {
 	}
 
 	for(i = 0; i < rwlkm_readers; i++) {
-		snprintf(rwlkm_handler_name, rwlkm_handler_name_len, "rwlkm_reader_%d", i);
-		rwlkm_reader_handlers[i] = kthread_run(&rwlkm_reader, NULL, rwlkm_handler_name);
+		rwlkm_reader_handlers[i] = kthread_run(&rwlkm_reader, NULL, "rwlkm_reader_%d", i);
 	}
 
 	for(i = 0; i < rwlkm_writers; i++) {
-		snprintf(rwlkm_handler_name, rwlkm_handler_name_len, "rwlkm_writer_%d", i);
-		rwlkm_writer_handlers[i] = kthread_run(&rwlkm_writer, NULL, rwlkm_handler_name);
+		rwlkm_writer_handlers[i] = kthread_run(&rwlkm_writer, NULL, "rwlkm_writer_%d", i);
 	}
 
 	return 0;
