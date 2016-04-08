@@ -68,7 +68,7 @@ static void __exit rwlkm_exit(void) {
 		kthread_stop(rwlkm_reader_handlers[i]);
 	}
 
-	for(i = 0; i < rwlkm_readers; i++) {
+	for(i = 0; i < rwlkm_writers; i++) {
 		kthread_stop(rwlkm_writer_handlers[i]);
 	}
 
