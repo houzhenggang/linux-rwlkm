@@ -28,7 +28,7 @@ static int rwlkm_reader(void* usrdata) {
 	while(!kthread_should_stop()) {
 
 		read_lock(&rwlkm_lock);
-		printk("The reader has read the value: %d\n", atomic_read(resource));
+		printk("PID %d: The reader has read the value: %d\n", current->pid, atomic_read(resource));
 		read_unlock(&rwlkm_lock);
 		msleep(rwlkm_sleep);
 
@@ -43,7 +43,7 @@ static int rwlkm_writer(void* usrdata) {
 	while(!kthread_should_stop()) {
 		write_lock(&rwlkm_lock);
 		atomic_inc(resource);
-		printk("The writer wrote the value: %d\n", atomic_read(resource));
+		printk("PID %d: The writer wrote the value: %d\n", current->pid, atomic_read(resource));
 		write_unlock(&rwlkm_lock);
 		msleep(rwlkm_sleep);
 	}
