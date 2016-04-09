@@ -9,10 +9,10 @@
 static atomic_t *resource;
 
 /* Количество потоков читателей и писателей */
-#define rwlkm_readers 2
+#define rwlkm_readers 5
 #define rwlkm_writers 1
 
-/* Время блокировки потока (для снижения нагрузки на CPU) */
+/* Время блокировки потока в секундах (для снижения нагрузки на CPU) */
 #define rwlkm_sleep 2
 
 /* Указатели на потоки ядра */
@@ -25,30 +25,42 @@ DEFINE_RWLOCK(rwlkm_lock);
 /* Функции потоков */
 static int rwlkm_reader(void* usrdata) {
 
-	while(!kthread_should_stop()) {
+	while(1) {
 
-		read_lock(&rwlkm_lock);
-		printk("PID %d: The reader has read the value: %d\n", current->pid, atomic_read(resource));
-		read_unlock(&rwlkm_lock);
-		ssleep(rwlkm_sleep);
+		schedule_timeout_interruptible(rwlkm_sleep * HZ);
+
+		if (!kthread_should_stop()) {
+
+			read_lock(&rwlkm_lock);
+			printk("PID %d: The reader has read the value: %d\n", current->pid, atomic_read(resource));
+			read_unlock(&rwlkm_lock);
+
+		} else {
+			return 0;
+		}
 
 	}
-
-	return 0;
 
 }
 
 static int rwlkm_writer(void* usrdata) {
 
-	while(!kthread_should_stop()) {
-		write_lock(&rwlkm_lock);
-		atomic_inc(resource);
-		printk("PID %d: The writer wrote the value: %d\n", current->pid, atomic_read(resource));
-		write_unlock(&rwlkm_lock);
-		ssleep(rwlkm_sleep);
+	while(1) {
+
+		schedule_timeout_interruptible(rwlkm_sleep * HZ);
+
+		if (!kthread_should_stop()) {
+
+			write_lock(&rwlkm_lock);
+			atomic_inc(resource);
+			printk("PID %d: The writer wrote the value: %d\n", current->pid, atomic_read(resource));
+			write_unlock(&rwlkm_lock);
+
+		} else {
+			return 0;
+		}
+
 	}
-	
-	return 0;
 
 }
 
