@@ -13,7 +13,7 @@ static atomic_t *resource;
 #define rwlkm_writers 1
 
 /* Время блокировки потока (для снижения нагрузки на CPU) */
-#define rwlkm_sleep 2000
+#define rwlkm_sleep 2
 
 /* Указатели на потоки ядра */
 static struct task_struct *rwlkm_reader_handlers[rwlkm_readers];
@@ -30,7 +30,7 @@ static int rwlkm_reader(void* usrdata) {
 		read_lock(&rwlkm_lock);
 		printk("PID %d: The reader has read the value: %d\n", current->pid, atomic_read(resource));
 		read_unlock(&rwlkm_lock);
-		msleep(rwlkm_sleep);
+		ssleep(rwlkm_sleep);
 
 	}
 
@@ -45,7 +45,7 @@ static int rwlkm_writer(void* usrdata) {
 		atomic_inc(resource);
 		printk("PID %d: The writer wrote the value: %d\n", current->pid, atomic_read(resource));
 		write_unlock(&rwlkm_lock);
-		msleep(rwlkm_sleep);
+		ssleep(rwlkm_sleep);
 	}
 	
 	return 0;
